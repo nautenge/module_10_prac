@@ -1,0 +1,73 @@
+using System;
+
+public class RoomBookingSystem
+{
+    public void book(DateTime startDay, int peoply, DateTime endDay, string typeBooking)
+    {
+
+    }
+
+    public void cleanRoom(int number)
+    {
+
+    }
+
+    public void NotificationCleaning(int number, string message)
+    {
+
+    }
+
+    public void checkOut(int number) { }
+    public void checkIn(int number) { }
+}
+
+    public class RestaurantSystem
+    {
+        public void bookTable(int people, DateTime time)
+        {
+
+        }
+
+        public void noificationKitchen(int people, int number) { }
+    }
+public class Notification
+    {
+        public void sendNotification(string message) { }
+    }
+
+////////////////////////////////////////////////////////////////////////////
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace module_07_practic
+{
+
+public static class HotelFacade
+    {
+        public void bookRoom(DateTime startDay, DateTime endDay, int people, string typeBooking) 
+        { 
+            RoomBookingSystem bookBookingSystem = new RoomBookingSystem();
+            RoomBookingSystem.book(startDay, endDay, peoply, typeBooking);
+
+            CleaningService cleaningService = new CleaningService();
+            cleaningService.notificationCleaning(int people, typeBooking);
+
+            ReataurantSystem reataurantSystem = new ReataurantSystem();
+            reataurantSystem.noficationKithcen(people, 322);
+
+            Notification notification = new Notification();
+            notification.sendNotification("fdfdsfsdf");
+
+        }
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+using module_07_practic;
+
+DateTime dateTime = new DateTime(2024, 12, 03);
+DateTime ddateTimeEnd = new DateTime(2024, 12, 15);
+
+HotelFacade.bookRoom(dateTime, dataTimeEnd, 2 , " ");
