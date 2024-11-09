@@ -1,0 +1,143 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+abstract class OrganizationComponent
+{
+    public string Name { get; protected set; }
+    public virtual decimal GetBudget() => 0;
+    public virtual int GetEmployeeCount() => 0;
+    public virtual void DisplayHierarchy(int indent = 0) { }
+    public virtual void Add(OrganizationComponent component) { }
+    public virtual void Remove(OrganizationComponent component) { }
+    public virtual OrganizationComponent FindEmployee(string name) => null;
+}
+
+class Employee : OrganizationComponent
+{
+    public string Position { get; private set; }
+    public decimal Salary { get; private set; }
+
+    public Employee(string name, string position, decimal salary)
+    {
+        Name = name;
+        Position = position;
+        Salary = salary;
+    }
+
+    public void UpdateSalary(decimal newSalary) => Salary = newSalary;
+
+    public override decimal GetBudget() => Salary;
+
+    public override int GetEmployeeCount() => 1;
+
+    public override void DisplayHierarchy(int indent = 0)
+    {
+        Console.WriteLine(new string(' ', indent) + $"{Name} - {Position}, Salary: {Salary:C}");
+    }
+
+    public override OrganizationComponent FindEmployee(string name)
+    {
+        return Name.Equals(name, StringComparison.OrdinalIgnoreCase) ? this : null;
+    }
+}
+
+class Contractor : Employee
+{
+    public Contractor(string name, string position, decimal fixedPay) 
+        : base(name, position, fixedPay) { }
+
+    public override decimal GetBudget() => 0;
+}
+
+class Department : OrganizationComponent
+{
+    private List<OrganizationComponent> components = new List<OrganizationComponent>();
+
+    public Department(string name)
+    {
+        Name = name;
+    }
+
+    public override void Add(OrganizationComponent component) => components.Add(component);
+
+    public override void Remove(OrganizationComponent component) => components.Remove(component);
+
+    public override decimal GetBudget() => components.Sum(c => c.GetBudget());
+
+    public override int GetEmployeeCount() => components.Sum(c => c.GetEmployeeCount());
+
+    public override void DisplayHierarchy(int indent = 0)
+    {
+        Console.WriteLine(new string(' ', indent) + $"Department: {Name}");
+        foreach (var component in components)
+        {
+            component.DisplayHierarchy(indent + 4);
+        }
+    }
+
+    public override OrganizationComponent FindEmployee(string name)
+    {
+        foreach (var component in components)
+        {
+            var found = component.FindEmployee(name);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    public List<Employee> GetAllEmployees()
+    {
+        var employees = new List<Employee>();
+        foreach (var component in components)
+        {
+            if (component is Employee employee)
+                employees.Add(employee);
+            else if (component is Department department)
+                employees.AddRange(department.GetAllEmployees());
+        }
+        return employees;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var emp1 = new Employee("Alice", "Developer", 70000);
+        var emp2 = new Employee("Bob", "Manager", 85000);
+        var contractor1 = new Contractor("Charlie", "Consultant", 50000);
+
+        var devDept = new Department("Development Department");
+        devDept.Add(emp1);
+        devDept.Add(contractor1);
+
+        var hrDept = new Department("HR Department");
+        hrDept.Add(emp2);
+
+        var headDept = new Department("Head Office");
+        headDept.Add(devDept);
+        headDept.Add(hrDept);
+
+        Console.WriteLine("Organizational Hierarchy:");
+        headDept.DisplayHierarchy();
+
+        Console.WriteLine("\nTotal Budget of Head Office: " + headDept.GetBudget());
+        Console.WriteLine("Total Employee Count: " + headDept.GetEmployeeCount());
+
+        var foundEmployee = headDept.FindEmployee("Alice");
+        if (foundEmployee != null)
+            foundEmployee.DisplayHierarchy();
+        else
+            Console.WriteLine("Employee not found.");
+
+        Console.WriteLine("\nAll Employees in Head Office:");
+        foreach (var employee in headDept.GetAllEmployees())
+        {
+            employee.DisplayHierarchy(4);
+        }
+    }
+}
